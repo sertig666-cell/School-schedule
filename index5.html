@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Розклад">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мій розклад</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#f2f2f7;
+  color:#111;
+}
+
+body.dark{
+  background:#111;
+  color:#fff;
+}
+
+.app{
+  max-width:600px;
+  margin:auto;
+  min-height:100vh;
+  padding-bottom:85px;
+}
+
+header{
+  padding:25px 20px 10px;
+}
+
+header h1{
+  margin:0;
+  font-size:30px;
+}
+
+header p{
+  margin:5px 0 0;
+  color:#777;
+}
+
+.dark header p{
+  color:#aaa;
+}
+
+.page{
+  display:none;
+  padding:15px;
+}
+
+.page.active{
+  display:block;
+}
+
+.card{
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:15px;
+  box-shadow:0 3px 12px rgba(0,0,0,.06);
+}
+
+.dark .card{
+  background:#1c1c1e;
+  box-shadow:none;
+}
+
+/* TIMER */
+
+.bigTimer{
+  text-align:center;
+  padding:25px 15px;
+}
+
+.status{
+  font-size:17px;
+  color:#777;
+  margin-bottom:8px;
+}
+
+.dark .status{
+  color:#aaa;
+}
+
+.currentSubject{
+  font-size:27px;
+  font-weight:700;
+  margin:5px 0;
+}
+
+.timer{
+  font-size:55px;
+  font-weight:800;
+  letter-spacing:2px;
+  margin:15px 0;
+}
+
+.timeInfo{
+  color:#777;
+  font-size:15px;
+}
+
+.dark .timeInfo{
+  color:#aaa;
+}
+
+.progress{
+  height:12px;
+  background:#ddd;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:20px;
+}
+
+.dark .progress{
+  background:#333;
+}
+
+.progressFill{
+  height:100%;
+  width:0%;
+  background:#007aff;
+  transition:width .5s linear;
+}
+
+/* BUTTONS */
+
+button{
+  border:0;
+  border-radius:14px;
+  padding:12px 16px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.primary{
+  background:#007aff;
+  color:white;
+  width:100%;
+}
+
+.danger{
+  background:#ff3b30;
+  color:white;
+}
+
+.gray{
+  background:#e5e5ea;
+  color:#111;
+}
+
+.dark .gray{
+  background:#333;
+  color:white;
+}
+
+/* INPUTS */
+
+input,
+select,
+textarea{
+  width:100%;
+  padding:13px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  font-size:16px;
+  background:white;
+  color:#111;
+  margin-top:7px;
+  margin-bottom:14px;
+}
+
+.dark input,
+.dark select,
+.dark textarea{
+  background:#2c2c2e;
+  border-color:#444;
+  color:white;
+}
+
+textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+label{
+  font-weight:600;
+}
+
+/* DAYS */
+
+.dayButtons{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  margin-bottom:15px;
+}
+
+.dayButtons button{
+  flex:1;
+  min-width:65px;
+  background:#ddd;
+}
+
+.dayButtons button.active{
+  background:#007aff;
+  color:white;
+}
+
+.dark .dayButtons button{
+  background:#333;
+  color:white;
+}
+
+/* LESSONS */
+
+.lesson{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:15px 0;
+  border-bottom:1px solid #eee;
+}
+
+.dark .lesson{
+  border-bottom-color:#333;
+}
+
+.lesson:last-child{
+  border-bottom:0;
+}
+
+.lessonTime{
+  min-width:90px;
+  font-size:14px;
+  color:#777;
+}
+
+.lessonName{
+  flex:1;
+  font-weight:600;
+}
+
+.room{
+  color:#777;
+  font-size:13px;
+}
+
+.deleteBtn{
+  background:none;
+  color:#ff3b30;
+  padding:5px;
+}
+
+/* HOMEWORK */
+
+.hwDay{
+  font-size:20px;
+  font-weight:700;
+  margin:20px 0 10px;
+}
+
+.hwItem{
+  background:white;
+  border-radius:15px;
+  padding:15px;
+  margin-bottom:10px;
+}
+
+.dark .hwItem{
+  background:#1c1c1e;
+}
+
+.hwSubject{
+  font-weight:700;
+  font-size:17px;
+}
+
+.hwText{
+  margin:7px 0;
+  white-space:pre-wrap;
+}
+
+.hwDone{
+  opacity:.5;
+  text-decoration:line-through;
+}
+
+.hwButtons{
+  display:flex;
+  gap:7px;
+}
+
+.hwButtons button{
+  font-size:14px;
+  padding:8px 11px;
+}
+
+.empty{
+  text-align:center;
+  color:#888;
+  padding:25px;
+}
+
+/* NAVIGATION */
+
+nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:75px;
+  background:rgba(255,255,255,.95);
+  backdrop-filter:blur(15px);
+  display:flex;
+  justify-content:center;
+  z-index:10;
+  border-top:1px solid #ddd;
+}
+
+.dark nav{
+  background:rgba(28,28,30,.95);
+  border-top-color:#333;
+}
+
+.navInner{
+  width:100%;
+  max-width:600px;
+  display:flex;
+}
+
+nav button{
+  flex:1;
+  background:none;
+  border-radius:0;
+  color:#777;
+  font-size:12px;
+}
+
+nav button.active{
+  color:#007aff;
+}
+
+.navIcon{
+  font-size:23px;
+  display:block;
+  margin-bottom:3px;
+}
+
+/* SETTINGS */
+
+.settingRow{
+  margin-bottom:10px;
+}
+
+.checkboxRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:5px 0;
+}
+
+.switch{
+  width:50px;
+  height:30px;
+  position:relative;
+}
+
+.switch input{
+  display:none;
+}
+
+.slider{
+  position:absolute;
+  inset:0;
+  background:#ccc;
+  border-radius:20px;
+  cursor:pointer;
+}
+
+.slider:before{
+  content:"";
+  position:absolute;
+  width:24px;
+  height:24px;
+  left:3px;
+  top:3px;
+  background:white;
+  border-radius:50%;
+  transition:.2s;
+}
+
+.switch input:checked + .slider{
+  background:#34c759;
+}
+
+.switch input:checked + .slider:before{
+  transform:translateX(20px);
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+  <h1>Мій розклад</h1>
+  <p id="todayText"></p>
+</header>
+
+<!-- ГОЛОВНА -->
+
+<section id="home" class="page active">
+
+  <div class="card bigTimer">
+
+    <div class="status" id="timerStatus">
+      Завантаження...
+    </div>
+
+    <div class="currentSubject" id="currentSubject">
+      —
+    </div>
+
+    <div class="timer" id="timer">
+      00:00
+    </div>
+
+    <div class="timeInfo" id="timeInfo">
+      —
+    </div>
+
+    <div class="progress">
+      <div class="progressFill" id="progressFill"></div>
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h2>Сьогодні</h2>
+
+    <div id="todaySchedule"></div>
+
+  </div>
+
+</section>
+
+
+<!-- РОЗКЛАД -->
+
+<section id="schedule" class="page">
+
+  <div class="dayButtons" id="scheduleDays"></div>
+
+  <div class="card">
+
+    <h2 id="scheduleTitle">
+      Понеділок
+    </h2>
+
+    <div id="lessonsList"></div>
+
+    <button class="primary" onclick="showAddLesson()">
+      ＋ Додати урок
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ДЗ -->
+
+<section id="homework" class="page">
+
+  <div class="card">
+
+    <h2>Домашнє завдання</h2>
+
+    <button class="primary" onclick="showAddHomework()">
+      ＋ Додати ДЗ
+    </button>
+
+  </div>
+
+  <div id="homeworkList"></div>
+
+</section>
+
+
+<!-- ДОДАТИ ДЗ -->
+
+<section id="addHomework" class="page">
+
+  <div class="card">
+
+    <h2>Нове ДЗ</h2>
+
+    <label>День</label>
+    <select id="hwDay"></select>
+
+    <label>Предмет</label>
+    <select id="hwLesson"></select>
+
+    <label>Завдання</label>
+    <textarea
+      id="hwText"
+      placeholder="Напиши домашнє завдання..."
+    ></textarea>
+
+    <button class="primary" onclick="saveHomework()">
+      Зберегти
+    </button>
+
+    <br><br>
+
+    <button
+      class="gray"
+      style="width:100%"
+      onclick="openPage('homework')">
+      Скасувати
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ДОДАТИ УРОК -->
+
+<section id="addLesson" class="page">
+
+  <div class="card">
+
+    <h2>Новий урок</h2>
+
+    <label>Предмет</label>
+    <input
+      id="lessonSubject"
+      placeholder="Наприклад: Математика"
+    >
+
+    <label>Кабінет</label>
+    <input
+      id="lessonRoom"
+      placeholder="Наприклад: 205"
+    >
+
+    <button class="primary" onclick="saveLesson()">
+      Додати урок
+    </button>
+
+    <br><br>
+
+    <button
+      class="gray"
+      style="width:100%"
+      onclick="openPage('schedule')">
+      Скасувати
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- НАЛАШТУВАННЯ -->
+
+<section id="settings" class="page">
+
+  <div class="card">
+
+    <h2>Налаштування</h2>
+
+    <div class="settingRow">
+
+      <label>
+        Початок першого уроку
+      </label>
+
+      <input
+        type="time"
+        id="startTime"
+      >
+
+    </div>
+
+    <div class="settingRow">
+
+      <label>
+        Тривалість уроку, хв
+      </label>
+
+      <input
+        type="number"
+        id="lessonDuration"
+        min="1"
+      >
+
+    </div>
+
+    <div class="settingRow">
+
+      <label>
+        Тривалість звичайної перерви, хв
+      </label>
+
+      <input
+        type="number"
+        id="breakDuration"
+        min="0"
+      >
+
+    </div>
+
+    <div class="card" style="margin-top:15px">
+
+      <b>🟡 Велика перерва</b>
+
+      <p style="color:#777">
+        Щодня автоматично: <b>12:30 — 13:00</b>
+      </p>
+
+    </div>
+
+    <button
+      class="primary"
+      onclick="saveSettings()">
+      Зберегти налаштування
+    </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <div class="checkboxRow">
+
+      <span>🌙 Темна тема</span>
+
+      <label class="switch">
+
+        <input
+          type="checkbox"
+          id="darkMode"
+          onchange="toggleDark()"
+        >
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+  </div>
+
+</section>
+
+</div>
+
+
+<!-- НИЖНЯ НАВІГАЦІЯ -->
+
+<nav>
+
+  <div class="navInner">
+
+    <button
+      onclick="openPage('home')"
+      id="navHome">
+
+      <span class="navIcon">🏠</span>
+      Головна
+
+    </button>
+
+    <button
+      onclick="openPage('schedule')"
+      id="navSchedule">
+
+      <span class="navIcon">📅</span>
+      Розклад
+
+    </button>
+
+    <button
+      onclick="openPage('homework')"
+      id="navHomework">
+
+      <span class="navIcon">📝</span>
+      ДЗ
+
+    </button>
+
+    <button
+      onclick="openPage('settings')"
+      id="navSettings">
+
+      <span class="navIcon">⚙️</span>
+      Налаштування
+
+    </button>
+
+  </div>
+
+</nav>
+
+
+<script>
+
+/* =========================
+   ДАНІ
+========================= */
+
+const STORAGE = "schoolScheduleV5";
+
+const DAYS = [
+  "Понеділок",
+  "Вівторок",
+  "Середа",
+  "Четвер",
+  "П'ятниця"
+];
+
+let data =
+  JSON.parse(
+    localStorage.getItem(STORAGE)
+  );
+
+if(!data){
+
+  data = {
+
+    settings:{
+      start:"08:30",
+      lesson:45,
+      break:10
+    },
+
+    schedule:[
+      [],
+      [],
+      [],
+      [],
+      []
+    ],
+
+    homework:[],
+
+    dark:false
+
+  };
+
+  saveData();
+
+}
+
+
+let selectedDay =
+  new Date().getDay()-1;
+
+if(selectedDay<0 || selectedDay>4){
+  selectedDay=0;
+}
+
+
+/* =========================
+   ЗБЕРЕЖЕННЯ
+========================= */
+
+function saveData(){
+
+  localStorage.setItem(
+    STORAGE,
+    JSON.stringify(data)
+  );
+
+}
+
+
+/* =========================
+   НАВІГАЦІЯ
+========================= */
+
+function openPage(id){
+
+  document
+    .querySelectorAll(".page")
+    .forEach(page=>{
+      page.classList.remove("active");
+    });
+
+  document
+    .getElementById(id)
+    .classList.add("active");
+
+
+  document
+    .querySelectorAll("nav button")
+    .forEach(button=>{
+      button.classList.remove("active");
+    });
+
+
+  if(id==="home")
+    navHome.classList.add("active");
+
+  if(id==="schedule")
+    navSchedule.classList.add("active");
+
+  if(id==="homework" ||
+     id==="addHomework")
+    navHomework.classList.add("active");
+
+  if(id==="settings")
+    navSettings.classList.add("active");
+
+
+  if(id==="home")
+    renderHome();
+
+  if(id==="schedule")
+    renderSchedule();
+
+  if(id==="homework")
+    renderHomework();
+
+  if(id==="settings")
+    renderSettings();
+
+}
+
+
+/* =========================
+   ЧАС УРОКІВ
+========================= */
+
+/*
+  ВЕЛИКА ПЕРЕРВА:
+  12:30 = 750 хвилин
+  13:00 = 780 хвилин
+*/
+
+function getLessonTimes(day){
+
+  let result=[];
+
+  let [hour,minute] =
+    data.settings.start
+      .split(":")
+      .map(Number);
+
+  let current =
+    hour*60 + minute;
+
+
+  data.schedule[day].forEach(
+    (lesson,index)=>{
+
+      /*
+        Якщо ми дійшли до
+        12:30–13:00,
+        пропускаємо велику перерву.
+      */
+
+      if(
+        current >= 750 &&
+        current < 780
+      ){
+
+        current = 780;
+
+      }
+
+
+      let start=current;
+
+      let end =
+        start +
+        Number(data.settings.lesson);
+
+
+      /*
+        Якщо урок починається до 12:30,
+        але заходить за 12:30 —
+        закінчуємо його рівно о 12:30.
+      */
+
+      if(
+        start < 750 &&
+        end > 750
+      ){
+
+        end=750;
+
+      }
+
+
+      result.push({
+
+        start:start,
+        end:end,
+
+        startText:
+          minutesToTime(start),
+
+        endText:
+          minutesToTime(end)
+
+      });
+
+
+      current =
+        end +
+        Number(data.settings.break);
+
+
+      /*
+        Якщо після звичайної перерви
+        ми потрапили у велику перерву —
+        переносимо наступний урок на 13:00.
+      */
+
+      if(
+        current >= 750 &&
+        current < 780
+      ){
+
+        current=780;
+
+      }
+
+    }
+  );
+
+
+  return result;
+
+}
+
+
+function minutesToTime(minutes){
+
+  minutes =
+    minutes % 1440;
+
+  let h =
+    Math.floor(minutes/60);
+
+  let m =
+    minutes%60;
+
+  return String(h).padStart(2,"0")
+    + ":" +
+    String(m).padStart(2,"0");
+
+}
+
+
+/* =========================
+   ДАТА
+========================= */
+
+function updateDate(){
+
+  let now =
+    new Date();
+
+  let day =
+    now.getDay();
+
+  let text;
+
+  if(day>=1 && day<=5){
+
+    text=DAYS[day-1];
+
+  }else{
+
+    text="Вихідний";
+
+  }
+
+
+  document.getElementById(
+    "todayText"
+  ).textContent =
+    text +
+    " • " +
+    now.toLocaleDateString(
+      "uk-UA"
+    );
+
+}
+
+
+/* =========================
+   ГОЛОВНИЙ ТАЙМЕР
+========================= */
+
+function updateTimer(){
+
+  let now =
+    new Date();
+
+  let day =
+    now.getDay()-1;
+
+
+  let status =
+    document.getElementById(
+      "timerStatus"
+    );
+
+  let subject =
+    document.getElementById(
+      "currentSubject"
+    );
+
+  let timer =
+    document.getElementById(
+      "timer"
+    );
+
+  let info =
+    document.getElementById(
+      "timeInfo"
+    );
+
+  let progress =
+    document.getElementById(
+      "progressFill"
+    );
+
+
+  /* ВИХІДНІ */
+
+  if(day<0 || day>4){
+
+    status.textContent=
+      "Сьогодні вихідний";
+
+    subject.textContent="😴";
+
+    timer.textContent="--:--";
+
+    info.textContent=
+      "Уроків сьогодні немає";
+
+    progress.style.width="0%";
+
+    return;
+
+  }
+
+
+  /* ВЕЛИКА ПЕРЕРВА */
+
+  let currentSeconds =
+    now.getHours()*3600 +
+    now.getMinutes()*60 +
+    now.getSeconds();
+
+
+  let bigBreakStart =
+    12*3600 + 30*60;
+
+  let bigBreakEnd =
+    13*3600;
+
+
+  if(
+    currentSeconds >= bigBreakStart &&
+    currentSeconds < bigBreakEnd
+  ){
+
+    let remaining =
+      bigBreakEnd -
+      currentSeconds;
+
+
+    status.textContent=
+      "Велика перерва";
+
+    subject.textContent=
+      "☕ Відпочивай";
+
+    timer.textContent=
+      formatSeconds(remaining);
+
+    info.textContent=
+      "12:30 — 13:00";
+
+    progress.style.width =
+      (
+        (currentSeconds-bigBreakStart) /
+        (bigBreakEnd-bigBreakStart) *
+        100
+      ) + "%";
+
+    return;
+
+  }
+
+
+  let lessons =
+    data.schedule[day];
+
+
+  if(lessons.length===0){
+
+    status.textContent=
+      "Сьогодні немає уроків";
+
+    subject.textContent=
+      "Вільний день";
+
+    timer.textContent="--:--";
+
+    info.textContent="";
+
+    progress.style.width="0%";
+
+    return;
+
+  }
+
+
+  let times =
+    getLessonTimes(day);
+
+
+  let currentMinutes =
+    now.getHours()*60 +
+    now.getMinutes() +
+    now.getSeconds()/60;
+
+
+  /* =========================
+     УРОКИ
+  ========================= */
+
+  for(
+    let i=0;
+    i<lessons.length;
+    i++
+  ){
+
+    let t=times[i];
+
+
+    /* ЗАРАЗ УРОК */
+
+    if(
+      currentMinutes >= t.start &&
+      currentMinutes < t.end
+    ){
+
+      let remaining =
+        t.end*60 -
+        (
+          now.getHours()*3600 +
+          now.getMinutes()*60 +
+          now.getSeconds()
+        );
+
+
+      let total =
+        (t.end-t.start)*60;
+
+
+      let elapsed =
+        total-remaining;
+
+
+      let percent =
+        Math.max(
+          0,
+          Math.min(
+            100,
+            elapsed/total*100
+          )
+        );
+
+
+      status.textContent=
+        "Зараз урок";
+
+      subject.textContent=
+        lessons[i].subject;
+
+      timer.textContent=
+        formatSeconds(remaining);
+
+      info.textContent=
+        t.startText +
+        " — " +
+        t.endText +
+        (
+          lessons[i].room
+          ? " • каб. "+
+            lessons[i].room
+          : ""
+        );
+
+
+      progress.style.width=
+        percent+"%";
+
+
+      return;
+
+    }
+
+
+    /* =========================
+       ЗВИЧАЙНА ПЕРЕРВА
+    ========================= */
+
+    if(i < lessons.length-1){
+
+      let next =
+        times[i+1];
+
+
+      if(
+        currentMinutes >= t.end &&
+        currentMinutes < next.start
+      ){
+
+        let remaining =
+          next.start*60 -
+          (
+            now.getHours()*3600 +
+            now.getMinutes()*60 +
+            now.getSeconds()
+          );
+
+
+        status.textContent=
+          "Перерва";
+
+        subject.textContent=
+          "До наступного уроку";
+
+        timer.textContent=
+          formatSeconds(remaining);
+
+        info.textContent=
+          "Наступний: " +
+          lessons[i+1].subject +
+          " • " +
+          next.startText;
+
+        progress.style.width="0%";
+
+
+        return;
+
+      }
+
+    }
+
+  }
+
+
+  /* =========================
+     ПІСЛЯ УРОКІВ
+  ========================= */
+
+  let last =
+    times[times.length-1];
+
+
+  if(currentMinutes >= last.end){
+
+    status.textContent=
+      "Уроки на сьогодні закінчились";
+
+    subject.textContent=
+      "🏠";
+
+    timer.textContent=
+      "00:00";
+
+    info.textContent=
+      "До завтра!";
+
+    progress.style.width=
+      "100%";
+
+  }
+
+}
+
+
+function formatSeconds(seconds){
+
+  seconds =
+    Math.max(
+      0,
+      Math.floor(seconds)
+    );
+
+  let min =
+    Math.floor(seconds/60);
+
+  let sec =
+    seconds%60;
+
+  return String(min).padStart(2,"0")
+    + ":" +
+    String(sec).padStart(2,"0");
+
+}
+
+
+/* =========================
+   РОЗКЛАД
+========================= */
+
+function renderScheduleDays(){
+
+  let container =
+    document.getElementById(
+      "scheduleDays"
+    );
+
+  container.innerHTML="";
+
+
+  DAYS.forEach(
+    (day,index)=>{
+
+      let button =
+        document.createElement(
+          "button"
+        );
+
+      button.textContent =
+        day.substring(0,2);
+
+
+      if(index===selectedDay){
+
+        button.classList.add(
+          "active"
+        );
+
+      }
+
+
+      button.onclick=()=>{
+
+        selectedDay=index;
+
+        renderSchedule();
+
+      };
+
+
+      container.appendChild(button);
+
+    }
+  );
+
+}
+
+
+function renderSchedule(){
+
+  renderScheduleDays();
+
+
+  document.getElementById(
+    "scheduleTitle"
+  ).textContent =
+    DAYS[selectedDay];
+
+
+  let container =
+    document.getElementById(
+      "lessonsList"
+    );
+
+  container.innerHTML="";
+
+
+  let lessons =
+    data.schedule[selectedDay];
+
+  let times =
+    getLessonTimes(selectedDay);
+
+
+  if(lessons.length===0){
+
+    container.innerHTML=
+      `<div class="empty">
+        Тут ще немає уроків
+      </div>`;
+
+    return;
+
+  }
+
+
+  lessons.forEach(
+    (lesson,index)=>{
+
+      let div =
+        document.createElement(
+          "div"
+        );
+
+      div.className="lesson";
+
+
+      div.innerHTML=`
+
+        <div class="lessonTime">
+          ${times[index].startText}<br>
+          ${times[index].endText}
+        </div>
+
+        <div class="lessonName">
+
+          ${escapeHTML(
+            lesson.subject
+          )}
+
+          ${
+            lesson.room
+            ?
+            `<div class="room">
+              Каб. ${escapeHTML(
+                lesson.room
+              )}
+            </div>`
+            :
+            ""
+          }
+
+        </div>
+
+        <button
+          class="deleteBtn"
+          onclick="deleteLesson(${index})">
+          ✕
+        </button>
+
+      `;
+
+
+      container.appendChild(div);
+
+    }
+  );
+
+}
+
+
+/* =========================
+   ДОДАТИ УРОК
+========================= */
+
+function showAddLesson(){
+
+  document.getElementById(
+    "lessonSubject"
+  ).value="";
+
+  document.getElementById(
+    "lessonRoom"
+  ).value="";
+
+  openPage("addLesson");
+
+}
+
+
+function saveLesson(){
+
+  let subject =
+    document.getElementById(
+      "lessonSubject"
+    ).value.trim();
+
+
+  let room =
+    document.getElementById(
+      "lessonRoom"
+    ).value.trim();
+
+
+  if(!subject){
+
+    alert(
+      "Введи назву предмета"
+    );
+
+    return;
+
+  }
+
+
+  data.schedule[
+    selectedDay
+  ].push({
+
+    subject:subject,
+
+    room:room
+
+  });
+
+
+  saveData();
+
+  openPage("schedule");
+
+}
+
+
+function deleteLesson(index){
+
+  if(
+    !confirm(
+      "Видалити цей урок?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  data.schedule[
+    selectedDay
+  ].splice(index,1);
+
+
+  data.homework =
+    data.homework.filter(
+      hw=>{
+
+        return !(
+          hw.day===selectedDay &&
+          hw.lessonIndex===index
+        );
+
+      }
+    );
+
+
+  data.homework.forEach(
+    hw=>{
+
+      if(
+        hw.day===selectedDay &&
+        hw.lessonIndex>index
+      ){
+
+        hw.lessonIndex--;
+
+      }
+
+    }
+  );
+
+
+  saveData();
+
+  renderSchedule();
+
+}
+
+
+/* =========================
+   ДОДАТИ ДЗ
+========================= */
+
+function showAddHomework(){
+
+  let daySelect =
+    document.getElementById(
+      "hwDay"
+    );
+
+
+  daySelect.innerHTML="";
+
+
+  DAYS.forEach(
+    (day,index)=>{
+
+      let option =
+        document.createElement(
+          "option"
+        );
+
+      option.value=index;
+
+      option.textContent=day;
+
+
+      if(index===selectedDay){
+
+        option.selected=true;
+
+      }
+
+
+      daySelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  updateHomeworkSubjects();
+
+
+  document.getElementById(
+    "hwText"
+  ).value="";
+
+
+  openPage(
+    "addHomework"
+  );
+
+}
+
+
+document.getElementById(
+  "hwDay"
+).addEventListener(
+  "change",
+  updateHomeworkSubjects
+);
+
+
+function updateHomeworkSubjects(){
+
+  let day =
+    Number(
+      document.getElementById(
+        "hwDay"
+      ).value
+    );
+
+
+  let select =
+    document.getElementById(
+      "hwLesson"
+    );
+
+
+  select.innerHTML="";
+
+
+  let lessons =
+    data.schedule[day];
+
+
+  if(lessons.length===0){
+
+    let option =
+      document.createElement(
+        "option"
+      );
+
+    option.textContent=
+      "Спочатку додай урок";
+
+    option.value="";
+
+
+    select.appendChild(
+      option
+    );
+
+    return;
+
+  }
+
+
+  lessons.forEach(
+    (lesson,index)=>{
+
+      let option =
+        document.createElement(
+          "option"
+        );
+
+      option.value=index;
+
+      option.textContent=
+        lesson.subject;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+}
+
+
+function saveHomework(){
+
+  let day =
+    Number(
+      document.getElementById(
+        "hwDay"
+      ).value
+    );
+
+
+  let lessonIndex =
+    Number(
+      document.getElementById(
+        "hwLesson"
+      ).value
+    );
+
+
+  let text =
+    document.getElementById(
+      "hwText"
+    ).value.trim();
+
+
+  if(!text){
+
+    alert(
+      "Напиши домашнє завдання"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !data.schedule[day][lessonIndex]
+  ){
+
+    alert(
+      "Спочатку додай урок"
+    );
+
+    return;
+
+  }
+
+
+  data.homework.push({
+
+    id:Date.now(),
+
+    day:day,
+
+    lessonIndex:lessonIndex,
+
+    text:text,
+
+    done:false
+
+  });
+
+
+  saveData();
+
+  openPage(
+    "homework"
+  );
+
+}
+
+
+/* =========================
+   ПОКАЗ ДЗ
+========================= */
+
+function renderHomework(){
+
+  let container =
+    document.getElementById(
+      "homeworkList"
+    );
+
+  container.innerHTML="";
+
+
+  let hasHomework=false;
+
+
+  DAYS.forEach(
+    (day,dayIndex)=>{
+
+      let items =
+        data.homework.filter(
+          hw=>
+            hw.day===dayIndex
+        );
+
+
+      if(items.length===0)
+        return;
+
+
+      hasHomework=true;
+
+
+      let title =
+        document.createElement(
+          "div"
+        );
+
+      title.className="hwDay";
+
+      title.textContent=day;
+
+
+      container.appendChild(
+        title
+      );
+
+
+      items.forEach(
+        hw=>{
+
+          let lesson =
+            data.schedule[
+              hw.day
+            ][
+              hw.lessonIndex
+            ];
+
+
+          if(!lesson)
+            return;
+
+
+          let item =
+            document.createElement(
+              "div"
+            );
+
+          item.className=
+            "hwItem";
+
+
+          item.innerHTML=`
+
+            <div class="hwSubject">
+              ${escapeHTML(
+                lesson.subject
+              )}
+            </div>
+
+            <div class="hwText ${
+              hw.done
+              ? "hwDone"
+              : ""
+            }">
+
+              ${escapeHTML(
+                hw.text
+              )}
+
+            </div>
+
+            <div class="hwButtons">
+
+              <button
+                class="gray"
+                onclick="toggleHomework(${hw.id})">
+
+                ${
+                  hw.done
+                  ? "↩️ Не виконано"
+                  : "✅ Виконано"
+                }
+
+              </button>
+
+              <button
+                class="gray"
+                onclick="editHomework(${hw.id})">
+
+                ✏️
+
+              </button>
+
+              <button
+                class="danger"
+                onclick="deleteHomework(${hw.id})">
+
+                🗑️
+
+              </button>
+
+            </div>
+
+          `;
+
+
+          container.appendChild(
+            item
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+  if(!hasHomework){
+
+    container.innerHTML=
+      `<div class="card empty">
+        ДЗ поки немає 📚
+      </div>`;
+
+  }
+
+}
+
+
+function toggleHomework(id){
+
+  let hw =
+    data.homework.find(
+      x=>x.id===id
+    );
+
+
+  if(!hw)
+    return;
+
+
+  hw.done=
+    !hw.done;
+
+
+  saveData();
+
+  renderHomework();
+
+}
+
+
+function deleteHomework(id){
+
+  if(
+    !confirm(
+      "Видалити це ДЗ?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  data.homework =
+    data.homework.filter(
+      x=>x.id!==id
+    );
+
+
+  saveData();
+
+  renderHomework();
+
+}
+
+
+function editHomework(id){
+
+  let hw =
+    data.homework.find(
+      x=>x.id===id
+    );
+
+
+  if(!hw)
+    return;
+
+
+  let newText =
+    prompt(
+      "Зміни домашнє завдання:",
+      hw.text
+    );
+
+
+  if(newText===null)
+    return;
+
+
+  newText=
+    newText.trim();
+
+
+  if(!newText)
+    return;
+
+
+  hw.text=
+    newText;
+
+
+  saveData();
+
+  renderHomework();
+
+}
+
+
+/* =========================
+   СЬОГОДНІШНІЙ РОЗКЛАД
+========================= */
+
+function renderHome(){
+
+  let day =
+    new Date().getDay()-1;
+
+
+  let container =
+    document.getElementById(
+      "todaySchedule"
+    );
+
+
+  container.innerHTML="";
+
+
+  if(day<0 || day>4){
+
+    container.innerHTML=
+      `<div class="empty">
+        Сьогодні вихідний 😴
+      </div>`;
+
+    return;
+
+  }
+
+
+  let lessons =
+    data.schedule[day];
+
+
+  let times =
+    getLessonTimes(day);
+
+
+  if(lessons.length===0){
+
+    container.innerHTML=
+      `<div class="empty">
+        Уроків сьогодні немає
+      </div>`;
+
+    return;
+
+  }
+
+
+  lessons.forEach(
+    (lesson,index)=>{
+
+      let div =
+        document.createElement(
+          "div"
+        );
+
+      div.className="lesson";
+
+
+      div.innerHTML=`
+
+        <div class="lessonTime">
+          ${times[index].startText}
+        </div>
+
+        <div class="lessonName">
+          ${escapeHTML(
+            lesson.subject
+          )}
+        </div>
+
+      `;
+
+
+      container.appendChild(
+        div
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================
+   НАЛАШТУВАННЯ
+========================= */
+
+function renderSettings(){
+
+  document.getElementById(
+    "startTime"
+  ).value =
+    data.settings.start;
+
+
+  document.getElementById(
+    "lessonDuration"
+  ).value =
+    data.settings.lesson;
+
+
+  document.getElementById(
+    "breakDuration"
+  ).value =
+    data.settings.break;
+
+
+  document.getElementById(
+    "darkMode"
+  ).checked =
+    data.dark;
+
+}
+
+
+function saveSettings(){
+
+  data.settings.start =
+    document.getElementById(
+      "startTime"
+    ).value;
+
+
+  data.settings.lesson =
+    Number(
+      document.getElementById(
+        "lessonDuration"
+      ).value
+    );
+
+
+  data.settings.break =
+    Number(
+      document.getElementById(
+        "breakDuration"
+      ).value
+    );
+
+
+  saveData();
+
+  alert(
+    "Налаштування збережено ✅"
+  );
+
+
+  renderHome();
+
+}
+
+
+function toggleDark(){
+
+  data.dark =
+    document.getElementById(
+      "darkMode"
+    ).checked;
+
+
+  saveData();
+
+  applyDark();
+
+}
+
+
+function applyDark(){
+
+  document.body.classList.toggle(
+    "dark",
+    data.dark
+  );
+
+}
+
+
+/* =========================
+   ЗАХИСТ ТЕКСТУ
+========================= */
+
+function escapeHTML(text){
+
+  return String(text)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================
+   ЗАПУСК
+========================= */
+
+applyDark();
+
+updateDate();
+
+renderHome();
+
+renderSchedule();
+
+renderSettings();
+
+updateTimer();
+
+
+/*
+  Оновлення кожну секунду.
+  Тому таймер завжди синхронізований
+  з часом iPhone.
+*/
+
+setInterval(
+  ()=>{
+    updateTimer();
+    updateDate();
+  },
+  1000
+);
+
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js");
+  });
+}
+</script>
+
+</body>
+</html>
