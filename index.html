@@ -1,411 +1,535 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Розклад</title>
+
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f1115">
+<meta name="theme-color" content="#08090d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Розклад">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Мій розклад</title>
 
 <style>
 *{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent
+}
+
+:root{
+--bg:#08090d;
+--card:rgba(255,255,255,.055);
+--border:rgba(255,255,255,.1);
+--text:#f5f5f7;
+--muted:#92949e;
+--accent:#7c5cff;
+--accent2:#a18eff;
+--green:#32d583;
+--red:#ff5d6c;
 }
 
 body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:#f2f2f7;
-  color:#111;
+margin:0;
+min-height:100vh;
+background:
+radial-gradient(circle at 15% 0%,rgba(124,92,255,.2),transparent 35%),
+radial-gradient(circle at 90% 15%,rgba(72,167,255,.1),transparent 30%),
+var(--bg);
+color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Arial,sans-serif;
+overflow-x:hidden
 }
 
-body.dark{
-  background:#111;
-  color:#fff;
+button,input,select,textarea{font:inherit}
+
+button{
+border:0;
+color:inherit;
+cursor:pointer
 }
 
 .app{
-  max-width:600px;
-  margin:auto;
-  min-height:100vh;
-  padding-bottom:85px;
+max-width:760px;
+margin:auto;
+padding:env(safe-area-inset-top) 16px calc(100px + env(safe-area-inset-bottom))
 }
 
-header{
-  padding:25px 20px 10px;
+.header{
+padding:22px 4px 14px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+animation:down .5s ease
 }
 
-header h1{
-  margin:0;
-  font-size:30px;
+.header-title{
+font-size:30px;
+font-weight:800;
+letter-spacing:-1px
 }
 
-header p{
-  margin:5px 0 0;
-  color:#777;
+.header-subtitle{
+margin-top:3px;
+color:var(--muted);
+font-size:14px
 }
 
-.dark header p{
-  color:#aaa;
+.header-time{
+color:var(--muted);
+font-size:15px
 }
 
 .page{
-  display:none;
-  padding:15px;
+display:none;
+animation:page .3s ease
 }
 
-.page.active{
-  display:block;
+.page.active{display:block}
+
+.hero{
+position:relative;
+overflow:hidden;
+padding:24px;
+min-height:290px;
+border-radius:30px;
+background:
+linear-gradient(145deg,
+rgba(124,92,255,.25),
+rgba(255,255,255,.045) 55%,
+rgba(72,167,255,.08));
+border:1px solid var(--border);
+box-shadow:0 20px 60px rgba(0,0,0,.35);
+backdrop-filter:blur(25px);
+-webkit-backdrop-filter:blur(25px)
 }
 
-.card{
-  background:white;
-  border-radius:20px;
-  padding:20px;
-  margin-bottom:15px;
-  box-shadow:0 3px 12px rgba(0,0,0,.06);
+.hero:before{
+content:"";
+position:absolute;
+width:220px;
+height:220px;
+border-radius:50%;
+background:rgba(124,92,255,.22);
+filter:blur(60px);
+right:-90px;
+top:-90px;
+animation:float 7s ease-in-out infinite
 }
 
-.dark .card{
-  background:#1c1c1e;
-  box-shadow:none;
-}
-
-/* TIMER */
-
-.bigTimer{
-  text-align:center;
-  padding:25px 15px;
+.hero-content{
+position:relative;
+z-index:2
 }
 
 .status{
-  font-size:17px;
-  color:#777;
-  margin-bottom:8px;
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:7px 11px;
+border-radius:100px;
+background:rgba(255,255,255,.08);
+color:#d8d5ff;
+font-size:12px;
+font-weight:700;
+text-transform:uppercase
 }
 
-.dark .status{
-  color:#aaa;
+.status-dot{
+width:7px;
+height:7px;
+border-radius:50%;
+background:var(--green);
+box-shadow:0 0 14px var(--green);
+animation:pulse 1.8s infinite
 }
 
-.currentSubject{
-  font-size:27px;
-  font-weight:700;
-  margin:5px 0;
+.hero-title{
+margin:20px 0 5px;
+font-size:32px;
+font-weight:800;
+letter-spacing:-1px
+}
+
+.hero-info{
+color:var(--muted);
+font-size:14px
 }
 
 .timer{
-  font-size:55px;
-  font-weight:800;
-  letter-spacing:2px;
-  margin:15px 0;
+margin-top:18px;
+font-size:48px;
+line-height:1;
+font-weight:800;
+letter-spacing:-2px;
+font-variant-numeric:tabular-nums
 }
 
-.timeInfo{
-  color:#777;
-  font-size:15px;
-}
+.progress-wrap{margin-top:20px}
 
-.dark .timeInfo{
-  color:#aaa;
+.progress-bg{
+height:8px;
+background:rgba(255,255,255,.08);
+border-radius:20px;
+overflow:hidden
 }
 
 .progress{
-  height:12px;
-  background:#ddd;
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:20px;
+height:100%;
+width:0;
+border-radius:20px;
+background:linear-gradient(90deg,var(--accent),#a994ff);
+transition:width .8s linear
 }
 
-.dark .progress{
-  background:#333;
+.progress-times{
+display:flex;
+justify-content:space-between;
+color:var(--muted);
+font-size:12px;
+margin-top:7px
 }
 
-.progressFill{
-  height:100%;
-  width:0%;
-  background:#007aff;
-  transition:width .5s linear;
+.card{
+margin-top:14px;
+padding:18px;
+border-radius:24px;
+background:var(--card);
+border:1px solid var(--border);
+backdrop-filter:blur(18px);
+-webkit-backdrop-filter:blur(18px);
+animation:card .5s ease
 }
 
-/* BUTTONS */
-
-button{
-  border:0;
-  border-radius:14px;
-  padding:12px 16px;
-  font-size:16px;
-  cursor:pointer;
+.section-title{
+font-size:18px;
+font-weight:750;
+margin-bottom:13px
 }
 
-.primary{
-  background:#007aff;
-  color:white;
-  width:100%;
+.next-lesson{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:15px
 }
 
-.danger{
-  background:#ff3b30;
-  color:white;
+.next-left{
+display:flex;
+align-items:center;
+gap:13px
 }
 
-.gray{
-  background:#e5e5ea;
-  color:#111;
+.lesson-number{
+width:42px;
+height:42px;
+display:grid;
+place-items:center;
+border-radius:14px;
+background:rgba(124,92,255,.15);
+color:#b9aaff;
+font-weight:800
 }
 
-.dark .gray{
-  background:#333;
-  color:white;
+.next-name{font-weight:700}
+
+.next-time{
+color:var(--muted);
+font-size:13px;
+margin-top:3px
 }
 
-/* INPUTS */
-
-input,
-select,
-textarea{
-  width:100%;
-  padding:13px;
-  border:1px solid #ddd;
-  border-radius:12px;
-  font-size:16px;
-  background:white;
-  color:#111;
-  margin-top:7px;
-  margin-bottom:14px;
+.next-count{
+color:var(--accent2);
+font-weight:700;
+white-space:nowrap
 }
 
-.dark input,
-.dark select,
-.dark textarea{
-  background:#2c2c2e;
-  border-color:#444;
-  color:white;
+.day-tabs{
+display:flex;
+gap:7px;
+overflow-x:auto;
+padding:4px 1px 12px;
+scrollbar-width:none
 }
 
-textarea{
-  min-height:100px;
-  resize:vertical;
+.day-tabs::-webkit-scrollbar{display:none}
+
+.day-tab{
+flex:1;
+min-width:60px;
+padding:11px 8px;
+border-radius:15px;
+background:var(--card);
+color:var(--muted);
+font-size:13px;
+font-weight:700;
+transition:.25s
 }
 
-label{
-  font-weight:600;
+.day-tab.active{
+color:white;
+background:var(--accent);
+box-shadow:0 8px 25px rgba(124,92,255,.28)
 }
 
-/* DAYS */
-
-.dayButtons{
-  display:flex;
-  gap:7px;
-  overflow-x:auto;
-  margin-bottom:15px;
+.lesson-card{
+display:flex;
+gap:13px;
+padding:16px;
+margin-bottom:10px;
+border-radius:20px;
+background:var(--card);
+border:1px solid var(--border);
+animation:up .4s ease both
 }
 
-.dayButtons button{
-  flex:1;
-  min-width:65px;
-  background:#ddd;
+.lesson-num{
+min-width:35px;
+height:35px;
+display:grid;
+place-items:center;
+border-radius:12px;
+background:rgba(255,255,255,.06);
+color:var(--muted);
+font-weight:800
 }
 
-.dayButtons button.active{
-  background:#007aff;
-  color:white;
+.lesson-main{flex:1}
+
+.lesson-name{font-weight:700}
+
+.lesson-time{
+margin-top:5px;
+color:var(--muted);
+font-size:13px
 }
 
-.dark .dayButtons button{
-  background:#333;
-  color:white;
+.lesson-actions{
+display:flex;
+align-items:center
 }
 
-/* LESSONS */
-
-.lesson{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:15px 0;
-  border-bottom:1px solid #eee;
+.delete-btn{
+width:36px;
+height:36px;
+border-radius:11px;
+background:rgba(255,255,255,.06);
+color:var(--muted);
+font-size:20px
 }
 
-.dark .lesson{
-  border-bottom-color:#333;
+.delete-btn:active{transform:scale(.9)}
+
+.add-btn{
+width:100%;
+margin-top:5px;
+padding:15px;
+border-radius:18px;
+background:linear-gradient(135deg,var(--accent),#6546e8);
+font-weight:750;
+box-shadow:0 10px 30px rgba(124,92,255,.25);
+transition:.2s
 }
 
-.lesson:last-child{
-  border-bottom:0;
+.add-btn:active{transform:scale(.97)}
+
+.homework-day{margin-bottom:18px}
+
+.homework-day-title{
+color:var(--muted);
+font-size:13px;
+font-weight:700;
+margin:0 0 8px 4px;
+text-transform:uppercase
 }
 
-.lessonTime{
-  min-width:90px;
-  font-size:14px;
-  color:#777;
+.homework-item{
+display:flex;
+gap:12px;
+align-items:center;
+padding:14px;
+margin-bottom:8px;
+border-radius:18px;
+background:var(--card);
+border:1px solid var(--border)
 }
 
-.lessonName{
-  flex:1;
-  font-weight:600;
+.check{
+width:24px;
+height:24px;
+border-radius:50%;
+border:2px solid rgba(255,255,255,.22);
+display:grid;
+place-items:center;
+flex-shrink:0
 }
 
-.room{
-  color:#777;
-  font-size:13px;
+.homework-item.done .check{
+background:var(--green);
+border-color:var(--green);
+color:#06120c
 }
 
-.deleteBtn{
-  background:none;
-  color:#ff3b30;
-  padding:5px;
+.homework-item.done .hw-text{
+text-decoration:line-through;
+opacity:.45
 }
 
-/* HOMEWORK */
+.hw-main{flex:1}
 
-.hwDay{
-  font-size:20px;
-  font-weight:700;
-  margin:20px 0 10px;
+.hw-subject{
+font-size:12px;
+color:var(--accent2);
+font-weight:700
 }
 
-.hwItem{
-  background:white;
-  border-radius:15px;
-  padding:15px;
-  margin-bottom:10px;
+.hw-text{
+margin-top:3px;
+font-size:14px;
+line-height:1.35
 }
 
-.dark .hwItem{
-  background:#1c1c1e;
+.field{margin-bottom:14px}
+
+.field label{
+display:block;
+color:var(--muted);
+font-size:12px;
+font-weight:700;
+margin:0 0 7px 4px
 }
 
-.hwSubject{
-  font-weight:700;
-  font-size:17px;
+input{
+width:100%;
+padding:14px;
+color:var(--text);
+background:rgba(255,255,255,.055);
+border:1px solid var(--border);
+border-radius:16px;
+outline:none
 }
 
-.hwText{
-  margin:7px 0;
-  white-space:pre-wrap;
+input:focus{
+border-color:rgba(124,92,255,.7);
+box-shadow:0 0 0 3px rgba(124,92,255,.1)
 }
 
-.hwDone{
-  opacity:.5;
-  text-decoration:line-through;
+.nav{
+position:fixed;
+z-index:100;
+left:50%;
+bottom:calc(12px + env(safe-area-inset-bottom));
+transform:translateX(-50%);
+width:min(92%,560px);
+display:flex;
+padding:7px;
+gap:5px;
+border-radius:23px;
+background:rgba(20,20,26,.82);
+border:1px solid rgba(255,255,255,.1);
+box-shadow:0 15px 50px rgba(0,0,0,.5);
+backdrop-filter:blur(25px);
+-webkit-backdrop-filter:blur(25px)
 }
 
-.hwButtons{
-  display:flex;
-  gap:7px;
+.nav-btn{
+flex:1;
+padding:10px 5px;
+border-radius:17px;
+background:transparent;
+color:var(--muted);
+transition:.25s
 }
 
-.hwButtons button{
-  font-size:14px;
-  padding:8px 11px;
+.nav-icon{
+display:block;
+font-size:19px;
+margin-bottom:2px
+}
+
+.nav-text{
+display:block;
+font-size:10px;
+font-weight:700
+}
+
+.nav-btn.active{
+color:white;
+background:rgba(124,92,255,.18)
 }
 
 .empty{
-  text-align:center;
-  color:#888;
-  padding:25px;
+text-align:center;
+padding:35px 15px;
+color:var(--muted)
 }
 
-/* NAVIGATION */
-
-nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:75px;
-  background:rgba(255,255,255,.95);
-  backdrop-filter:blur(15px);
-  display:flex;
-  justify-content:center;
-  z-index:10;
-  border-top:1px solid #ddd;
+.empty-icon{
+font-size:42px;
+margin-bottom:8px
 }
 
-.dark nav{
-  background:rgba(28,28,30,.95);
-  border-top-color:#333;
+.toast{
+position:fixed;
+z-index:300;
+left:50%;
+top:calc(15px + env(safe-area-inset-top));
+transform:translate(-50%,-150%);
+padding:13px 18px;
+border-radius:16px;
+background:rgba(30,30,37,.95);
+border:1px solid var(--border);
+box-shadow:0 20px 60px rgba(0,0,0,.35);
+font-size:14px;
+font-weight:650;
+transition:.4s
 }
 
-.navInner{
-  width:100%;
-  max-width:600px;
-  display:flex;
+.toast.show{
+transform:translate(-50%,0)
 }
 
-nav button{
-  flex:1;
-  background:none;
-  border-radius:0;
-  color:#777;
-  font-size:12px;
+@keyframes down{
+from{opacity:0;transform:translateY(-15px)}
+to{opacity:1;transform:translateY(0)}
 }
 
-nav button.active{
-  color:#007aff;
+@keyframes page{
+from{opacity:0;transform:translateY(8px)}
+to{opacity:1;transform:translateY(0)}
 }
 
-.navIcon{
-  font-size:23px;
-  display:block;
-  margin-bottom:3px;
+@keyframes card{
+from{opacity:0;transform:translateY(15px)}
+to{opacity:1;transform:translateY(0)}
 }
 
-/* SETTINGS */
-
-.settingRow{
-  margin-bottom:10px;
+@keyframes up{
+from{opacity:0;transform:translateY(12px)}
+to{opacity:1;transform:translateY(0)}
 }
 
-.checkboxRow{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:5px 0;
+@keyframes pulse{
+0%,100%{transform:scale(1)}
+50%{transform:scale(1.35)}
 }
 
-.switch{
-  width:50px;
-  height:30px;
-  position:relative;
+@keyframes float{
+0%,100%{transform:translate(0,0)}
+50%{transform:translate(-15px,15px)}
 }
 
-.switch input{
-  display:none;
+@media(max-width:430px){
+.hero{
+min-height:275px;
+padding:21px;
+border-radius:27px
 }
 
-.slider{
-  position:absolute;
-  inset:0;
-  background:#ccc;
-  border-radius:20px;
-  cursor:pointer;
-}
-
-.slider:before{
-  content:"";
-  position:absolute;
-  width:24px;
-  height:24px;
-  left:3px;
-  top:3px;
-  background:white;
-  border-radius:50%;
-  transition:.2s;
-}
-
-.switch input:checked + .slider{
-  background:#34c759;
-}
-
-.switch input:checked + .slider:before{
-  transform:translateX(20px);
+.hero-title{font-size:29px}
+.timer{font-size:43px}
+.header-title{font-size:27px}
 }
 </style>
 </head>
@@ -414,1862 +538,951 @@ nav button.active{
 
 <div class="app">
 
-<header>
-  <h1>Мій розклад</h1>
-  <p id="todayText"></p>
+<header class="header">
+<div>
+<div class="header-title">Розклад</div>
+<div class="header-subtitle" id="dateText">Завантаження...</div>
+</div>
+<div class="header-time" id="clock">--:--</div>
 </header>
 
-<!-- ГОЛОВНА -->
+<main id="page-home" class="page active">
 
-<section id="home" class="page active">
+<section class="hero">
+<div class="hero-content">
 
-  <div class="card bigTimer">
+<div class="status">
+<span class="status-dot"></span>
+<span id="statusText">Завантаження</span>
+</div>
 
-    <div class="status" id="timerStatus">
-      Завантаження...
-    </div>
+<div class="hero-title" id="currentSubject">—</div>
 
-    <div class="currentSubject" id="currentSubject">
-      —
-    </div>
+<div class="hero-info" id="currentInfo">
+Перевіряємо розклад...
+</div>
 
-    <div class="timer" id="timer">
-      00:00
-    </div>
+<div class="timer" id="mainTimer">00:00</div>
 
-    <div class="timeInfo" id="timeInfo">
-      —
-    </div>
+<div class="progress-wrap">
+<div class="progress-bg">
+<div class="progress" id="mainProgress"></div>
+</div>
 
-    <div class="progress">
-      <div class="progressFill" id="progressFill"></div>
-    </div>
+<div class="progress-times">
+<span id="progressStart">--:--</span>
+<span id="progressEnd">--:--</span>
+</div>
+</div>
 
-  </div>
-
-  <div class="card">
-
-    <h2>Сьогодні</h2>
-
-    <div id="todaySchedule"></div>
-
-  </div>
-
+</div>
 </section>
 
+<section class="card">
 
-<!-- РОЗКЛАД -->
+<div class="section-title">Далі</div>
 
-<section id="schedule" class="page">
+<div class="next-lesson">
 
-  <div class="dayButtons" id="scheduleDays"></div>
+<div class="next-left">
 
-  <div class="card">
+<div class="lesson-number" id="nextNumber">—</div>
 
-    <h2 id="scheduleTitle">
-      Понеділок
-    </h2>
-
-    <div id="lessonsList"></div>
-
-    <button class="primary" onclick="showAddLesson()">
-      ＋ Додати урок
-    </button>
-
-  </div>
-
-</section>
-
-
-<!-- ДЗ -->
-
-<section id="homework" class="page">
-
-  <div class="card">
-
-    <h2>Домашнє завдання</h2>
-
-    <button class="primary" onclick="showAddHomework()">
-      ＋ Додати ДЗ
-    </button>
-
-  </div>
-
-  <div id="homeworkList"></div>
-
-</section>
-
-
-<!-- ДОДАТИ ДЗ -->
-
-<section id="addHomework" class="page">
-
-  <div class="card">
-
-    <h2>Нове ДЗ</h2>
-
-    <label>День</label>
-    <select id="hwDay"></select>
-
-    <label>Предмет</label>
-    <select id="hwLesson"></select>
-
-    <label>Завдання</label>
-    <textarea
-      id="hwText"
-      placeholder="Напиши домашнє завдання..."
-    ></textarea>
-
-    <button class="primary" onclick="saveHomework()">
-      Зберегти
-    </button>
-
-    <br><br>
-
-    <button
-      class="gray"
-      style="width:100%"
-      onclick="openPage('homework')">
-      Скасувати
-    </button>
-
-  </div>
-
-</section>
-
-
-<!-- ДОДАТИ УРОК -->
-
-<section id="addLesson" class="page">
-
-  <div class="card">
-
-    <h2>Новий урок</h2>
-
-    <label>Предмет</label>
-    <input
-      id="lessonSubject"
-      placeholder="Наприклад: Математика"
-    >
-
-    <label>Кабінет</label>
-    <input
-      id="lessonRoom"
-      placeholder="Наприклад: 205"
-    >
-
-    <button class="primary" onclick="saveLesson()">
-      Додати урок
-    </button>
-
-    <br><br>
-
-    <button
-      class="gray"
-      style="width:100%"
-      onclick="openPage('schedule')">
-      Скасувати
-    </button>
-
-  </div>
-
-</section>
-
-
-<!-- НАЛАШТУВАННЯ -->
-
-<section id="settings" class="page">
-
-  <div class="card">
-
-    <h2>Налаштування</h2>
-
-    <div class="settingRow">
-
-      <label>
-        Початок першого уроку
-      </label>
-
-      <input
-        type="time"
-        id="startTime"
-      >
-
-    </div>
-
-    <div class="settingRow">
-
-      <label>
-        Тривалість уроку, хв
-      </label>
-
-      <input
-        type="number"
-        id="lessonDuration"
-        min="1"
-      >
-
-    </div>
-
-    <div class="settingRow">
-
-      <label>
-        Тривалість звичайної перерви, хв
-      </label>
-
-      <input
-        type="number"
-        id="breakDuration"
-        min="0"
-      >
-
-    </div>
-
-    <div class="card" style="margin-top:15px">
-
-      <b>🟡 Велика перерва</b>
-
-      <p style="color:#777">
-        Щодня автоматично: <b>12:30 — 13:00</b>
-      </p>
-
-    </div>
-
-    <button
-      class="primary"
-      onclick="saveSettings()">
-      Зберегти налаштування
-    </button>
-
-  </div>
-
-
-  <div class="card">
-
-    <div class="checkboxRow">
-
-      <span>🌙 Темна тема</span>
-
-      <label class="switch">
-
-        <input
-          type="checkbox"
-          id="darkMode"
-          onchange="toggleDark()"
-        >
-
-        <span class="slider"></span>
-
-      </label>
-
-    </div>
-
-  </div>
-
-</section>
+<div>
+<div class="next-name" id="nextName">—</div>
+<div class="next-time" id="nextTime">—</div>
+</div>
 
 </div>
 
+<div class="next-count" id="nextCount">—</div>
 
-<!-- НИЖНЯ НАВІГАЦІЯ -->
+</div>
 
-<nav>
+</section>
 
-  <div class="navInner">
+</main>
 
-    <button
-      onclick="openPage('home')"
-      id="navHome">
+<main id="page-schedule" class="page">
 
-      <span class="navIcon">🏠</span>
-      Головна
+<div class="day-tabs" id="dayTabs"></div>
 
-    </button>
+<div id="scheduleList"></div>
 
-    <button
-      onclick="openPage('schedule')"
-      id="navSchedule">
+<button class="add-btn" id="addLessonBtn">
+＋ Додати урок
+</button>
 
-      <span class="navIcon">📅</span>
-      Розклад
+</main>
 
-    </button>
+<main id="page-homework" class="page">
 
-    <button
-      onclick="openPage('homework')"
-      id="navHomework">
+<section class="card">
 
-      <span class="navIcon">📝</span>
-      ДЗ
+<div class="section-title">Домашнє завдання</div>
 
-    </button>
+<button class="add-btn" id="addHomeworkBtn">
+＋ Додати домашнє
+</button>
 
-    <button
-      onclick="openPage('settings')"
-      id="navSettings">
+</section>
 
-      <span class="navIcon">⚙️</span>
-      Налаштування
+<div id="homeworkList"></div>
 
-    </button>
+</main>
 
-  </div>
+<main id="page-settings" class="page">
+
+<section class="card">
+
+<div class="section-title">⚙️ Налаштування</div>
+
+<div class="field">
+<label>Початок першого уроку</label>
+<input type="time" id="startTime">
+</div>
+
+<div class="field">
+<label>Тривалість уроку, хв</label>
+<input type="number" id="lessonDuration" min="1">
+</div>
+
+<div class="field">
+<label>Звичайна перерва, хв</label>
+<input type="number" id="breakDuration" min="0">
+</div>
+
+<button class="add-btn" id="saveSettingsBtn">
+Зберегти налаштування
+</button>
+
+</section>
+
+</main>
+
+</div>
+
+<nav class="nav">
+
+<button class="nav-btn active" data-page="home">
+<span class="nav-icon">⌂</span>
+<span class="nav-text">Головна</span>
+</button>
+
+<button class="nav-btn" data-page="schedule">
+<span class="nav-icon">▦</span>
+<span class="nav-text">Розклад</span>
+</button>
+
+<button class="nav-btn" data-page="homework">
+<span class="nav-icon">✓</span>
+<span class="nav-text">Домашка</span>
+</button>
+
+<button class="nav-btn" data-page="settings">
+<span class="nav-icon">⚙</span>
+<span class="nav-text">Налаштування</span>
+</button>
 
 </nav>
 
+<div class="toast" id="toast"></div>
 
 <script>
+"use strict";
 
 /* =========================
-   ДАНІ
+   DATA
 ========================= */
 
-const STORAGE = "schoolScheduleV5";
+const STORAGE_KEY = "schoolScheduleV5";
 
-const DAYS = [
-  "Понеділок",
-  "Вівторок",
-  "Середа",
-  "Четвер",
-  "П'ятниця"
+const defaultData = {
+settings:{
+start:"08:30",
+lessonDuration:45,
+breakDuration:10
+},
+
+schedule:{
+"Понеділок":[],
+"Вівторок":[],
+"Середа":[],
+"Четвер":[],
+"П’ятниця":[]
+},
+
+homework:[]
+};
+
+let data;
+
+try{
+const saved=localStorage.getItem(STORAGE_KEY);
+data=saved?JSON.parse(saved):defaultData;
+}catch(e){
+data=JSON.parse(JSON.stringify(defaultData));
+}
+
+if(!data.settings)data.settings={...defaultData.settings};
+if(!data.schedule)data.schedule={...defaultData.schedule};
+if(!data.homework)data.homework=[];
+
+const days=[
+"Понеділок",
+"Вівторок",
+"Середа",
+"Четвер",
+"П’ятниця"
 ];
 
-let data =
-  JSON.parse(
-    localStorage.getItem(STORAGE)
-  );
+const shortDays=["Пн","Вт","Ср","Чт","Пт"];
 
-if(!data){
-
-  data = {
-
-    settings:{
-      start:"08:30",
-      lesson:45,
-      break:10
-    },
-
-    schedule:[
-      [],
-      [],
-      [],
-      [],
-      []
-    ],
-
-    homework:[],
-
-    dark:false
-
-  };
-
-  saveData();
-
-}
-
-
-let selectedDay =
-  new Date().getDay()-1;
-
-if(selectedDay<0 || selectedDay>4){
-  selectedDay=0;
-}
-
+let selectedDay=getTodayName();
 
 /* =========================
-   ЗБЕРЕЖЕННЯ
+   BASIC
 ========================= */
 
 function saveData(){
-
-  localStorage.setItem(
-    STORAGE,
-    JSON.stringify(data)
-  );
-
+try{
+localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+}catch(e){}
 }
 
-
-/* =========================
-   НАВІГАЦІЯ
-========================= */
-
-function openPage(id){
-
-  document
-    .querySelectorAll(".page")
-    .forEach(page=>{
-      page.classList.remove("active");
-    });
-
-  document
-    .getElementById(id)
-    .classList.add("active");
-
-
-  document
-    .querySelectorAll("nav button")
-    .forEach(button=>{
-      button.classList.remove("active");
-    });
-
-
-  if(id==="home")
-    navHome.classList.add("active");
-
-  if(id==="schedule")
-    navSchedule.classList.add("active");
-
-  if(id==="homework" ||
-     id==="addHomework")
-    navHomework.classList.add("active");
-
-  if(id==="settings")
-    navSettings.classList.add("active");
-
-
-  if(id==="home")
-    renderHome();
-
-  if(id==="schedule")
-    renderSchedule();
-
-  if(id==="homework")
-    renderHomework();
-
-  if(id==="settings")
-    renderSettings();
-
+function escapeHTML(value){
+return String(value??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
 }
 
+function getTodayName(){
+const d=new Date().getDay();
+
+if(d===0||d===6)return "Понеділок";
+
+return days[d-1];
+}
+
+function minutesFromTime(time){
+if(!time)return 0;
+
+const parts=time.split(":");
+return Number(parts[0])*60+Number(parts[1]);
+}
+
+function timeFromMinutes(minutes){
+minutes=((minutes%1440)+1440)%1440;
+
+const h=Math.floor(minutes/60);
+const m=minutes%60;
+
+return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
+}
+
+function formatSeconds(seconds){
+seconds=Math.max(0,Math.floor(seconds));
+
+const m=Math.floor(seconds/60);
+const s=seconds%60;
+
+return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+
+function toast(text){
+const el=document.getElementById("toast");
+
+el.textContent=text;
+el.classList.add("show");
+
+setTimeout(()=>{
+el.classList.remove("show");
+},2200);
+}
 
 /* =========================
-   ЧАС УРОКІВ
+   LESSON TIMES
 ========================= */
-
-/*
-  ВЕЛИКА ПЕРЕРВА:
-  12:30 = 750 хвилин
-  13:00 = 780 хвилин
-*/
 
 function getLessonTimes(day){
 
-  let result=[];
+const lessons=data.schedule[day]||[];
 
-  let [hour,minute] =
-    data.settings.start
-      .split(":")
-      .map(Number);
+let current=minutesFromTime(data.settings.start);
 
-  let current =
-    hour*60 + minute;
+const result=[];
 
+for(let i=0;i<lessons.length;i++){
 
-  data.schedule[day].forEach(
-    (lesson,index)=>{
-
-      /*
-        Якщо ми дійшли до
-        12:30–13:00,
-        пропускаємо велику перерву.
-      */
-
-      if(
-        current >= 750 &&
-        current < 780
-      ){
-
-        current = 780;
-
-      }
-
-
-      let start=current;
-
-      let end =
-        start +
-        Number(data.settings.lesson);
-
-
-      /*
-        Якщо урок починається до 12:30,
-        але заходить за 12:30 —
-        закінчуємо його рівно о 12:30.
-      */
-
-      if(
-        start < 750 &&
-        end > 750
-      ){
-
-        end=750;
-
-      }
-
-
-      result.push({
-
-        start:start,
-        end:end,
-
-        startText:
-          minutesToTime(start),
-
-        endText:
-          minutesToTime(end)
-
-      });
-
-
-      current =
-        end +
-        Number(data.settings.break);
-
-
-      /*
-        Якщо після звичайної перерви
-        ми потрапили у велику перерву —
-        переносимо наступний урок на 13:00.
-      */
-
-      if(
-        current >= 750 &&
-        current < 780
-      ){
-
-        current=780;
-
-      }
-
-    }
-  );
-
-
-  return result;
-
+if(current>=750&&current<780){
+current=780;
 }
 
+let start=current;
 
-function minutesToTime(minutes){
+let end=start+Number(data.settings.lessonDuration);
 
-  minutes =
-    minutes % 1440;
-
-  let h =
-    Math.floor(minutes/60);
-
-  let m =
-    minutes%60;
-
-  return String(h).padStart(2,"0")
-    + ":" +
-    String(m).padStart(2,"0");
-
+if(start<750&&end>750){
+end=750;
 }
 
+result.push({
+index:i,
+name:lessons[i].name||"",
+start:start,
+end:end
+});
+
+current=end;
+
+if(current===750){
+current=780;
+}else{
+current+=Number(data.settings.breakDuration);
+}
+}
+
+return result;
+}
 
 /* =========================
-   ДАТА
+   CLOCK
 ========================= */
 
-function updateDate(){
+function updateClock(){
 
-  let now =
-    new Date();
+const now=new Date();
 
-  let day =
-    now.getDay();
+document.getElementById("clock").textContent=
+now.toLocaleTimeString("uk-UA",{
+hour:"2-digit",
+minute:"2-digit"
+});
 
-  let text;
-
-  if(day>=1 && day<=5){
-
-    text=DAYS[day-1];
-
-  }else{
-
-    text="Вихідний";
-
-  }
-
-
-  document.getElementById(
-    "todayText"
-  ).textContent =
-    text +
-    " • " +
-    now.toLocaleDateString(
-      "uk-UA"
-    );
-
+document.getElementById("dateText").textContent=
+now.toLocaleDateString("uk-UA",{
+weekday:"long",
+day:"numeric",
+month:"long"
+});
 }
-
 
 /* =========================
-   ГОЛОВНИЙ ТАЙМЕР
+   HOME
 ========================= */
 
-function updateTimer(){
+function updateMain(){
 
-  let now =
-    new Date();
+const now=new Date();
 
-  let day =
-    now.getDay()-1;
+const currentMinutes=
+now.getHours()*60+
+now.getMinutes()+
+now.getSeconds()/60;
 
+const realDay=now.getDay();
+const day=getTodayName();
+const lessons=getLessonTimes(day);
 
-  let status =
-    document.getElementById(
-      "timerStatus"
-    );
+const status=document.getElementById("statusText");
+const subject=document.getElementById("currentSubject");
+const info=document.getElementById("currentInfo");
+const timer=document.getElementById("mainTimer");
+const progress=document.getElementById("mainProgress");
 
-  let subject =
-    document.getElementById(
-      "currentSubject"
-    );
+const start=document.getElementById("progressStart");
+const end=document.getElementById("progressEnd");
 
-  let timer =
-    document.getElementById(
-      "timer"
-    );
+if(realDay===0||realDay===6){
 
-  let info =
-    document.getElementById(
-      "timeInfo"
-    );
+status.textContent="Вихідний";
+subject.textContent="Відпочивай 😎";
+info.textContent="Сьогодні уроків немає";
+timer.textContent="🎉";
+progress.style.width="0%";
+start.textContent="";
+end.textContent="";
 
-  let progress =
-    document.getElementById(
-      "progressFill"
-    );
+updateNext(null,lessons);
 
-
-  /* ВИХІДНІ */
-
-  if(day<0 || day>4){
-
-    status.textContent=
-      "Сьогодні вихідний";
-
-    subject.textContent="😴";
-
-    timer.textContent="--:--";
-
-    info.textContent=
-      "Уроків сьогодні немає";
-
-    progress.style.width="0%";
-
-    return;
-
-  }
-
-
-  /* ВЕЛИКА ПЕРЕРВА */
-
-  let currentSeconds =
-    now.getHours()*3600 +
-    now.getMinutes()*60 +
-    now.getSeconds();
-
-
-  let bigBreakStart =
-    12*3600 + 30*60;
-
-  let bigBreakEnd =
-    13*3600;
-
-
-  if(
-    currentSeconds >= bigBreakStart &&
-    currentSeconds < bigBreakEnd
-  ){
-
-    let remaining =
-      bigBreakEnd -
-      currentSeconds;
-
-
-    status.textContent=
-      "Велика перерва";
-
-    subject.textContent=
-      "☕ Відпочивай";
-
-    timer.textContent=
-      formatSeconds(remaining);
-
-    info.textContent=
-      "12:30 — 13:00";
-
-    progress.style.width =
-      (
-        (currentSeconds-bigBreakStart) /
-        (bigBreakEnd-bigBreakStart) *
-        100
-      ) + "%";
-
-    return;
-
-  }
-
-
-  let lessons =
-    data.schedule[day];
-
-
-  if(lessons.length===0){
-
-    status.textContent=
-      "Сьогодні немає уроків";
-
-    subject.textContent=
-      "Вільний день";
-
-    timer.textContent="--:--";
-
-    info.textContent="";
-
-    progress.style.width="0%";
-
-    return;
-
-  }
-
-
-  let times =
-    getLessonTimes(day);
-
-
-  let currentMinutes =
-    now.getHours()*60 +
-    now.getMinutes() +
-    now.getSeconds()/60;
-
-
-  /* =========================
-     УРОКИ
-  ========================= */
-
-  for(
-    let i=0;
-    i<lessons.length;
-    i++
-  ){
-
-    let t=times[i];
-
-
-    /* ЗАРАЗ УРОК */
-
-    if(
-      currentMinutes >= t.start &&
-      currentMinutes < t.end
-    ){
-
-      let remaining =
-        t.end*60 -
-        (
-          now.getHours()*3600 +
-          now.getMinutes()*60 +
-          now.getSeconds()
-        );
-
-
-      let total =
-        (t.end-t.start)*60;
-
-
-      let elapsed =
-        total-remaining;
-
-
-      let percent =
-        Math.max(
-          0,
-          Math.min(
-            100,
-            elapsed/total*100
-          )
-        );
-
-
-      status.textContent=
-        "Зараз урок";
-
-      subject.textContent=
-        lessons[i].subject;
-
-      timer.textContent=
-        formatSeconds(remaining);
-
-      info.textContent=
-        t.startText +
-        " — " +
-        t.endText +
-        (
-          lessons[i].room
-          ? " • каб. "+
-            lessons[i].room
-          : ""
-        );
-
-
-      progress.style.width=
-        percent+"%";
-
-
-      return;
-
-    }
-
-
-    /* =========================
-       ЗВИЧАЙНА ПЕРЕРВА
-    ========================= */
-
-    if(i < lessons.length-1){
-
-      let next =
-        times[i+1];
-
-
-      if(
-        currentMinutes >= t.end &&
-        currentMinutes < next.start
-      ){
-
-        let remaining =
-          next.start*60 -
-          (
-            now.getHours()*3600 +
-            now.getMinutes()*60 +
-            now.getSeconds()
-          );
-
-
-        status.textContent=
-          "Перерва";
-
-        subject.textContent=
-          "До наступного уроку";
-
-        timer.textContent=
-          formatSeconds(remaining);
-
-        info.textContent=
-          "Наступний: " +
-          lessons[i+1].subject +
-          " • " +
-          next.startText;
-
-        progress.style.width="0%";
-
-
-        return;
-
-      }
-
-    }
-
-  }
-
-
-  /* =========================
-     ПІСЛЯ УРОКІВ
-  ========================= */
-
-  let last =
-    times[times.length-1];
-
-
-  if(currentMinutes >= last.end){
-
-    status.textContent=
-      "Уроки на сьогодні закінчились";
-
-    subject.textContent=
-      "🏠";
-
-    timer.textContent=
-      "00:00";
-
-    info.textContent=
-      "До завтра!";
-
-    progress.style.width=
-      "100%";
-
-  }
-
+return;
 }
 
+if(currentMinutes>=750&&currentMinutes<780){
 
-function formatSeconds(seconds){
+status.textContent="Велика перерва";
+subject.textContent="☕ Відпочивай";
+info.textContent="12:30 — 13:00";
 
-  seconds =
-    Math.max(
-      0,
-      Math.floor(seconds)
-    );
+timer.textContent=
+formatSeconds((780-currentMinutes)*60);
 
-  let min =
-    Math.floor(seconds/60);
+progress.style.width=
+((currentMinutes-750)/30*100)+"%";
 
-  let sec =
-    seconds%60;
+start.textContent="12:30";
+end.textContent="13:00";
 
-  return String(min).padStart(2,"0")
-    + ":" +
-    String(sec).padStart(2,"0");
+updateNext(null,lessons,true);
 
+return;
 }
 
+let current=null;
+let next=null;
+
+for(let i=0;i<lessons.length;i++){
+
+const lesson=lessons[i];
+
+if(currentMinutes>=lesson.start&&currentMinutes<lesson.end){
+
+current=lesson;
+next=lessons[i+1]||null;
+break;
+}
+
+if(currentMinutes<lesson.start){
+
+next=lesson;
+break;
+}
+}
+
+if(current){
+
+status.textContent="Зараз урок";
+subject.textContent=
+current.name||`Урок ${current.index+1}`;
+
+info.textContent=
+timeFromMinutes(current.start)+" — "+
+timeFromMinutes(current.end);
+
+timer.textContent=
+formatSeconds((current.end-currentMinutes)*60);
+
+const percent=
+(currentMinutes-current.start)/
+(current.end-current.start)*100;
+
+progress.style.width=
+Math.max(0,Math.min(100,percent))+"%";
+
+start.textContent=timeFromMinutes(current.start);
+end.textContent=timeFromMinutes(current.end);
+
+updateNext(current,lessons);
+
+return;
+}
+
+if(next){
+
+status.textContent="Перерва";
+subject.textContent="☕ Перерва";
+info.textContent=
+`До ${timeFromMinutes(next.start)}`;
+
+timer.textContent=
+formatSeconds((next.start-currentMinutes)*60);
+
+progress.style.width="0%";
+
+start.textContent="";
+end.textContent=timeFromMinutes(next.start);
+
+updateNext(null,lessons);
+
+return;
+}
+
+status.textContent="Уроки закінчились";
+subject.textContent="🏠 Можна додому";
+info.textContent="На сьогодні все";
+timer.textContent="00:00";
+progress.style.width="100%";
+start.textContent="";
+end.textContent="";
+
+updateNext(null,lessons);
+}
 
 /* =========================
-   РОЗКЛАД
+   NEXT
 ========================= */
 
-function renderScheduleDays(){
+function updateNext(current,lessons,bigBreak=false){
 
-  let container =
-    document.getElementById(
-      "scheduleDays"
-    );
+const number=document.getElementById("nextNumber");
+const name=document.getElementById("nextName");
+const time=document.getElementById("nextTime");
+const count=document.getElementById("nextCount");
 
-  container.innerHTML="";
+let next=null;
 
+if(bigBreak){
+next=lessons.find(x=>x.start>=780);
+}else if(current){
+next=lessons.find(x=>x.index===current.index+1);
+}else{
 
-  DAYS.forEach(
-    (day,index)=>{
+const now=new Date();
 
-      let button =
-        document.createElement(
-          "button"
-        );
+const mins=
+now.getHours()*60+
+now.getMinutes()+
+now.getSeconds()/60;
 
-      button.textContent =
-        day.substring(0,2);
-
-
-      if(index===selectedDay){
-
-        button.classList.add(
-          "active"
-        );
-
-      }
-
-
-      button.onclick=()=>{
-
-        selectedDay=index;
-
-        renderSchedule();
-
-      };
-
-
-      container.appendChild(button);
-
-    }
-  );
-
+next=lessons.find(x=>x.start>mins);
 }
 
+if(!next){
+
+number.textContent="✓";
+name.textContent="На сьогодні все";
+time.textContent="";
+count.textContent="";
+return;
+}
+
+number.textContent=next.index+1;
+name.textContent=next.name||`Урок ${next.index+1}`;
+time.textContent=timeFromMinutes(next.start);
+
+const now=new Date();
+
+const mins=
+now.getHours()*60+
+now.getMinutes()+
+now.getSeconds()/60;
+
+count.textContent=
+formatSeconds((next.start-mins)*60);
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function showPage(page,button){
+
+document.querySelectorAll(".page").forEach(p=>{
+p.classList.remove("active");
+});
+
+const target=document.getElementById("page-"+page);
+
+if(target)target.classList.add("active");
+
+document.querySelectorAll(".nav-btn").forEach(b=>{
+b.classList.remove("active");
+});
+
+if(button)button.classList.add("active");
+
+if(page==="schedule")renderSchedule();
+if(page==="homework")renderHomework();
+if(page==="settings")loadSettings();
+}
+
+/* =========================
+   SCHEDULE
+========================= */
+
+function renderDayTabs(){
+
+const box=document.getElementById("dayTabs");
+
+box.innerHTML="";
+
+days.forEach((day,i)=>{
+
+const btn=document.createElement("button");
+
+btn.className="day-tab";
+
+if(day===selectedDay){
+btn.classList.add("active");
+}
+
+btn.textContent=shortDays[i];
+
+btn.addEventListener("click",function(){
+
+selectedDay=day;
+
+renderDayTabs();
+renderScheduleList();
+
+});
+
+box.appendChild(btn);
+});
+}
 
 function renderSchedule(){
-
-  renderScheduleDays();
-
-
-  document.getElementById(
-    "scheduleTitle"
-  ).textContent =
-    DAYS[selectedDay];
-
-
-  let container =
-    document.getElementById(
-      "lessonsList"
-    );
-
-  container.innerHTML="";
-
-
-  let lessons =
-    data.schedule[selectedDay];
-
-  let times =
-    getLessonTimes(selectedDay);
-
-
-  if(lessons.length===0){
-
-    container.innerHTML=
-      `<div class="empty">
-        Тут ще немає уроків
-      </div>`;
-
-    return;
-
-  }
-
-
-  lessons.forEach(
-    (lesson,index)=>{
-
-      let div =
-        document.createElement(
-          "div"
-        );
-
-      div.className="lesson";
-
-
-      div.innerHTML=`
-
-        <div class="lessonTime">
-          ${times[index].startText}<br>
-          ${times[index].endText}
-        </div>
-
-        <div class="lessonName">
-
-          ${escapeHTML(
-            lesson.subject
-          )}
-
-          ${
-            lesson.room
-            ?
-            `<div class="room">
-              Каб. ${escapeHTML(
-                lesson.room
-              )}
-            </div>`
-            :
-            ""
-          }
-
-        </div>
-
-        <button
-          class="deleteBtn"
-          onclick="deleteLesson(${index})">
-          ✕
-        </button>
-
-      `;
-
-
-      container.appendChild(div);
-
-    }
-  );
-
+renderDayTabs();
+renderScheduleList();
 }
 
+function renderScheduleList(){
+
+const box=document.getElementById("scheduleList");
+
+const lessons=data.schedule[selectedDay]||[];
+
+if(!lessons.length){
+
+box.innerHTML=`
+<div class="card empty">
+<div class="empty-icon">📚</div>
+<div>Уроків поки немає</div>
+</div>`;
+
+return;
+}
+
+const times=getLessonTimes(selectedDay);
+
+box.innerHTML=lessons.map((lesson,index)=>{
+
+const t=times[index];
+
+return`
+<div class="lesson-card">
+
+<div class="lesson-num">${index+1}</div>
+
+<div class="lesson-main">
+
+<div class="lesson-name">
+${escapeHTML(lesson.name)}
+</div>
+
+<div class="lesson-time">
+${timeFromMinutes(t.start)} — ${timeFromMinutes(t.end)}
+</div>
+
+</div>
+
+<div class="lesson-actions">
+
+<button
+class="delete-btn"
+data-delete-lesson="${index}">
+×
+</button>
+
+</div>
+
+</div>`;
+
+}).join("");
+
+box.querySelectorAll("[data-delete-lesson]").forEach(btn=>{
+
+btn.addEventListener("click",function(){
+
+const index=Number(this.dataset.deleteLesson);
+
+if(!confirm("Видалити цей урок?"))return;
+
+data.schedule[selectedDay].splice(index,1);
+
+saveData();
+renderSchedule();
+updateMain();
+
+toast("Урок видалено");
+
+});
+});
+}
 
 /* =========================
-   ДОДАТИ УРОК
+   ADD LESSON
 ========================= */
 
-function showAddLesson(){
+function addLesson(){
 
-  document.getElementById(
-    "lessonSubject"
-  ).value="";
-
-  document.getElementById(
-    "lessonRoom"
-  ).value="";
-
-  openPage("addLesson");
-
-}
-
-
-function saveLesson(){
-
-  let subject =
-    document.getElementById(
-      "lessonSubject"
-    ).value.trim();
-
-
-  let room =
-    document.getElementById(
-      "lessonRoom"
-    ).value.trim();
-
-
-  if(!subject){
-
-    alert(
-      "Введи назву предмета"
-    );
-
-    return;
-
-  }
-
-
-  data.schedule[
-    selectedDay
-  ].push({
-
-    subject:subject,
-
-    room:room
-
-  });
-
-
-  saveData();
-
-  openPage("schedule");
-
-}
-
-
-function deleteLesson(index){
-
-  if(
-    !confirm(
-      "Видалити цей урок?"
-    )
-  ){
-
-    return;
-
-  }
-
-
-  data.schedule[
-    selectedDay
-  ].splice(index,1);
-
-
-  data.homework =
-    data.homework.filter(
-      hw=>{
-
-        return !(
-          hw.day===selectedDay &&
-          hw.lessonIndex===index
-        );
-
-      }
-    );
-
-
-  data.homework.forEach(
-    hw=>{
-
-      if(
-        hw.day===selectedDay &&
-        hw.lessonIndex>index
-      ){
-
-        hw.lessonIndex--;
-
-      }
-
-    }
-  );
-
-
-  saveData();
-
-  renderSchedule();
-
-}
-
-
-/* =========================
-   ДОДАТИ ДЗ
-========================= */
-
-function showAddHomework(){
-
-  let daySelect =
-    document.getElementById(
-      "hwDay"
-    );
-
-
-  daySelect.innerHTML="";
-
-
-  DAYS.forEach(
-    (day,index)=>{
-
-      let option =
-        document.createElement(
-          "option"
-        );
-
-      option.value=index;
-
-      option.textContent=day;
-
-
-      if(index===selectedDay){
-
-        option.selected=true;
-
-      }
-
-
-      daySelect.appendChild(
-        option
-      );
-
-    }
-  );
-
-
-  updateHomeworkSubjects();
-
-
-  document.getElementById(
-    "hwText"
-  ).value="";
-
-
-  openPage(
-    "addHomework"
-  );
-
-}
-
-
-document.getElementById(
-  "hwDay"
-).addEventListener(
-  "change",
-  updateHomeworkSubjects
+const name=prompt(
+`Новий урок — ${selectedDay}\n\nВведи назву предмета:`
 );
 
+if(!name||!name.trim())return;
 
-function updateHomeworkSubjects(){
-
-  let day =
-    Number(
-      document.getElementById(
-        "hwDay"
-      ).value
-    );
-
-
-  let select =
-    document.getElementById(
-      "hwLesson"
-    );
-
-
-  select.innerHTML="";
-
-
-  let lessons =
-    data.schedule[day];
-
-
-  if(lessons.length===0){
-
-    let option =
-      document.createElement(
-        "option"
-      );
-
-    option.textContent=
-      "Спочатку додай урок";
-
-    option.value="";
-
-
-    select.appendChild(
-      option
-    );
-
-    return;
-
-  }
-
-
-  lessons.forEach(
-    (lesson,index)=>{
-
-      let option =
-        document.createElement(
-          "option"
-        );
-
-      option.value=index;
-
-      option.textContent=
-        lesson.subject;
-
-
-      select.appendChild(
-        option
-      );
-
-    }
-  );
-
+if(!data.schedule[selectedDay]){
+data.schedule[selectedDay]=[];
 }
 
+data.schedule[selectedDay].push({
+name:name.trim()
+});
 
-function saveHomework(){
+saveData();
 
-  let day =
-    Number(
-      document.getElementById(
-        "hwDay"
-      ).value
-    );
+renderSchedule();
+updateMain();
 
-
-  let lessonIndex =
-    Number(
-      document.getElementById(
-        "hwLesson"
-      ).value
-    );
-
-
-  let text =
-    document.getElementById(
-      "hwText"
-    ).value.trim();
-
-
-  if(!text){
-
-    alert(
-      "Напиши домашнє завдання"
-    );
-
-    return;
-
-  }
-
-
-  if(
-    !data.schedule[day][lessonIndex]
-  ){
-
-    alert(
-      "Спочатку додай урок"
-    );
-
-    return;
-
-  }
-
-
-  data.homework.push({
-
-    id:Date.now(),
-
-    day:day,
-
-    lessonIndex:lessonIndex,
-
-    text:text,
-
-    done:false
-
-  });
-
-
-  saveData();
-
-  openPage(
-    "homework"
-  );
-
+toast("Урок додано ✓");
 }
-
 
 /* =========================
-   ПОКАЗ ДЗ
+   HOMEWORK
 ========================= */
+
+function addHomework(){
+
+const dayInput=prompt(
+"День тижня:\nПн / Вт / Ср / Чт / Пт"
+);
+
+if(!dayInput)return;
+
+const map={
+"пн":"Понеділок",
+"вт":"Вівторок",
+"ср":"Середа",
+"чт":"Четвер",
+"пт":"П’ятниця"
+};
+
+const fullDay=
+map[dayInput.trim().toLowerCase()]||
+dayInput.trim();
+
+if(!days.includes(fullDay)){
+
+toast("Невірний день");
+return;
+}
+
+const subject=prompt("Предмет:");
+
+if(!subject||!subject.trim())return;
+
+const task=prompt("Що задано?");
+
+if(!task||!task.trim())return;
+
+data.homework.push({
+id:Date.now(),
+day:fullDay,
+subject:subject.trim(),
+task:task.trim(),
+done:false
+});
+
+saveData();
+
+renderHomework();
+
+toast("Домашнє додано ✓");
+}
 
 function renderHomework(){
 
-  let container =
-    document.getElementById(
-      "homeworkList"
-    );
+const box=document.getElementById("homeworkList");
 
-  container.innerHTML="";
+if(!data.homework.length){
 
+box.innerHTML=`
+<div class="card empty">
+<div class="empty-icon">🎒</div>
+<div>Домашніх завдань поки немає</div>
+</div>`;
 
-  let hasHomework=false;
-
-
-  DAYS.forEach(
-    (day,dayIndex)=>{
-
-      let items =
-        data.homework.filter(
-          hw=>
-            hw.day===dayIndex
-        );
-
-
-      if(items.length===0)
-        return;
-
-
-      hasHomework=true;
-
-
-      let title =
-        document.createElement(
-          "div"
-        );
-
-      title.className="hwDay";
-
-      title.textContent=day;
-
-
-      container.appendChild(
-        title
-      );
-
-
-      items.forEach(
-        hw=>{
-
-          let lesson =
-            data.schedule[
-              hw.day
-            ][
-              hw.lessonIndex
-            ];
-
-
-          if(!lesson)
-            return;
-
-
-          let item =
-            document.createElement(
-              "div"
-            );
-
-          item.className=
-            "hwItem";
-
-
-          item.innerHTML=`
-
-            <div class="hwSubject">
-              ${escapeHTML(
-                lesson.subject
-              )}
-            </div>
-
-            <div class="hwText ${
-              hw.done
-              ? "hwDone"
-              : ""
-            }">
-
-              ${escapeHTML(
-                hw.text
-              )}
-
-            </div>
-
-            <div class="hwButtons">
-
-              <button
-                class="gray"
-                onclick="toggleHomework(${hw.id})">
-
-                ${
-                  hw.done
-                  ? "↩️ Не виконано"
-                  : "✅ Виконано"
-                }
-
-              </button>
-
-              <button
-                class="gray"
-                onclick="editHomework(${hw.id})">
-
-                ✏️
-
-              </button>
-
-              <button
-                class="danger"
-                onclick="deleteHomework(${hw.id})">
-
-                🗑️
-
-              </button>
-
-            </div>
-
-          `;
-
-
-          container.appendChild(
-            item
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-  if(!hasHomework){
-
-    container.innerHTML=
-      `<div class="card empty">
-        ДЗ поки немає 📚
-      </div>`;
-
-  }
-
+return;
 }
 
+let html="";
 
-function toggleHomework(id){
+days.forEach(day=>{
 
-  let hw =
-    data.homework.find(
-      x=>x.id===id
-    );
+const items=data.homework.filter(x=>x.day===day);
 
+if(!items.length)return;
 
-  if(!hw)
-    return;
+html+=`
+<section class="homework-day">
 
+<div class="homework-day-title">
+${day}
+</div>`;
 
-  hw.done=
-    !hw.done;
+items.forEach(item=>{
 
+html+=`
+<div class="homework-item ${item.done?"done":""}"
+data-homework-id="${item.id}">
 
-  saveData();
+<div class="check">
+${item.done?"✓":""}
+</div>
 
-  renderHomework();
+<div class="hw-main">
 
+<div class="hw-subject">
+${escapeHTML(item.subject)}
+</div>
+
+<div class="hw-text">
+${escapeHTML(item.task)}
+</div>
+
+</div>
+
+<button
+class="delete-btn"
+data-delete-homework="${item.id}">
+×
+</button>
+
+</div>`;
+});
+
+html+=`</section>`;
+});
+
+box.innerHTML=html;
+
+box.querySelectorAll("[data-homework-id]").forEach(item=>{
+
+item.addEventListener("click",function(e){
+
+if(e.target.closest("[data-delete-homework]"))return;
+
+const id=Number(this.dataset.homeworkId);
+
+const hw=data.homework.find(x=>x.id===id);
+
+if(!hw)return;
+
+hw.done=!hw.done;
+
+saveData();
+renderHomework();
+
+});
+});
+
+box.querySelectorAll("[data-delete-homework]").forEach(btn=>{
+
+btn.addEventListener("click",function(e){
+
+e.stopPropagation();
+
+const id=Number(this.dataset.deleteHomework);
+
+data.homework=
+data.homework.filter(x=>x.id!==id);
+
+saveData();
+renderHomework();
+
+toast("Домашнє видалено");
+
+});
+});
 }
-
-
-function deleteHomework(id){
-
-  if(
-    !confirm(
-      "Видалити це ДЗ?"
-    )
-  ){
-
-    return;
-
-  }
-
-
-  data.homework =
-    data.homework.filter(
-      x=>x.id!==id
-    );
-
-
-  saveData();
-
-  renderHomework();
-
-}
-
-
-function editHomework(id){
-
-  let hw =
-    data.homework.find(
-      x=>x.id===id
-    );
-
-
-  if(!hw)
-    return;
-
-
-  let newText =
-    prompt(
-      "Зміни домашнє завдання:",
-      hw.text
-    );
-
-
-  if(newText===null)
-    return;
-
-
-  newText=
-    newText.trim();
-
-
-  if(!newText)
-    return;
-
-
-  hw.text=
-    newText;
-
-
-  saveData();
-
-  renderHomework();
-
-}
-
 
 /* =========================
-   СЬОГОДНІШНІЙ РОЗКЛАД
+   SETTINGS
 ========================= */
 
-function renderHome(){
+function loadSettings(){
 
-  let day =
-    new Date().getDay()-1;
+document.getElementById("startTime").value=
+data.settings.start||"08:30";
 
+document.getElementById("lessonDuration").value=
+data.settings.lessonDuration||45;
 
-  let container =
-    document.getElementById(
-      "todaySchedule"
-    );
-
-
-  container.innerHTML="";
-
-
-  if(day<0 || day>4){
-
-    container.innerHTML=
-      `<div class="empty">
-        Сьогодні вихідний 😴
-      </div>`;
-
-    return;
-
-  }
-
-
-  let lessons =
-    data.schedule[day];
-
-
-  let times =
-    getLessonTimes(day);
-
-
-  if(lessons.length===0){
-
-    container.innerHTML=
-      `<div class="empty">
-        Уроків сьогодні немає
-      </div>`;
-
-    return;
-
-  }
-
-
-  lessons.forEach(
-    (lesson,index)=>{
-
-      let div =
-        document.createElement(
-          "div"
-        );
-
-      div.className="lesson";
-
-
-      div.innerHTML=`
-
-        <div class="lessonTime">
-          ${times[index].startText}
-        </div>
-
-        <div class="lessonName">
-          ${escapeHTML(
-            lesson.subject
-          )}
-        </div>
-
-      `;
-
-
-      container.appendChild(
-        div
-      );
-
-    }
-  );
-
+document.getElementById("breakDuration").value=
+data.settings.breakDuration??10;
 }
-
-
-/* =========================
-   НАЛАШТУВАННЯ
-========================= */
-
-function renderSettings(){
-
-  document.getElementById(
-    "startTime"
-  ).value =
-    data.settings.start;
-
-
-  document.getElementById(
-    "lessonDuration"
-  ).value =
-    data.settings.lesson;
-
-
-  document.getElementById(
-    "breakDuration"
-  ).value =
-    data.settings.break;
-
-
-  document.getElementById(
-    "darkMode"
-  ).checked =
-    data.dark;
-
-}
-
 
 function saveSettings(){
 
-  data.settings.start =
-    document.getElementById(
-      "startTime"
-    ).value;
+const start=document.getElementById("startTime").value;
 
+const lessonDuration=
+Number(document.getElementById("lessonDuration").value);
 
-  data.settings.lesson =
-    Number(
-      document.getElementById(
-        "lessonDuration"
-      ).value
-    );
+const breakDuration=
+Number(document.getElementById("breakDuration").value);
 
+if(!start||lessonDuration<1||breakDuration<0){
 
-  data.settings.break =
-    Number(
-      document.getElementById(
-        "breakDuration"
-      ).value
-    );
-
-
-  saveData();
-
-  alert(
-    "Налаштування збережено ✅"
-  );
-
-
-  renderHome();
-
+toast("Перевір налаштування");
+return;
 }
 
+data.settings.start=start;
+data.settings.lessonDuration=lessonDuration;
+data.settings.breakDuration=breakDuration;
 
-function toggleDark(){
+saveData();
 
-  data.dark =
-    document.getElementById(
-      "darkMode"
-    ).checked;
-
-
-  saveData();
-
-  applyDark();
-
-}
-
-
-function applyDark(){
-
-  document.body.classList.toggle(
-    "dark",
-    data.dark
-  );
-
-}
-
-
-/* =========================
-   ЗАХИСТ ТЕКСТУ
-========================= */
-
-function escapeHTML(text){
-
-  return String(text)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-
-}
-
-
-/* =========================
-   ЗАПУСК
-========================= */
-
-applyDark();
-
-updateDate();
-
-renderHome();
-
+updateMain();
 renderSchedule();
 
-renderSettings();
+toast("Налаштування збережено ✓");
+}
 
-updateTimer();
+/* =========================
+   BUTTON EVENTS
+========================= */
 
+document.querySelectorAll(".nav-btn").forEach(button=>{
 
-/*
-  Оновлення кожну секунду.
-  Тому таймер завжди синхронізований
-  з часом iPhone.
-*/
+button.addEventListener("click",function(){
 
-setInterval(
-  ()=>{
-    updateTimer();
-    updateDate();
-  },
-  1000
-);
+showPage(this.dataset.page,this);
 
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js");
-  });
+});
+});
+
+document.getElementById("addLessonBtn")
+.addEventListener("click",addLesson);
+
+document.getElementById("addHomeworkBtn")
+.addEventListener("click",addHomework);
+
+document.getElementById("saveSettingsBtn")
+.addEventListener("click",saveSettings);
+
+/* =========================
+   START
+========================= */
+
+updateClock();
+updateMain();
+
+setInterval(function(){
+
+updateClock();
+updateMain();
+
+},1000);
+
+/* =========================
+   SERVICE WORKER
+========================= */
+
+if("serviceWorker" in navigator){
+
+window.addEventListener("load",function(){
+
+navigator.serviceWorker
+.register("./sw.js")
+.catch(function(){});
+
+});
 }
 </script>
 
